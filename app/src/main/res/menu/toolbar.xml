@@ -18,8 +18,12 @@
         android:title="@string/sort_by_size_asc"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/sort_by_type"
-        android:title="@string/sort_by_type"
+    <item android:id="@+id/sort_by_type_asc"
+        android:title="@string/sort_by_type_asc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_type_desc"
+        android:title="@string/sort_by_type_desc"
         app:showAsAction="never"/>
 
     <item android:id="@+id/sort_by_name_asc"

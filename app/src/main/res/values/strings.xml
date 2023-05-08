@@ -1,12 +1,14 @@
 <resources>
     <string name="app_name">vk_intern</string>
-    <string name="toolbar_text">Файлы</string>
-    <string name="sort_name_asc">По названию (А-Я)</string>
-    <string name="sort_name_desc">По названию (Я-А)</string>
-    <string name="sort_by_size_desc">Сначала большие</string>
-    <string name="sort_by_size_asc">Сначала маленькие</string>
-    <string name="sort_by_date_asc">Сначала новые</string>
-    <string name="sort_by_date_desc">Сначала старые</string>
-    <string name="sort_by_type">По расширению</string>
+    <string name="toolbar_text">Files</string>
+    <string name="sort_name_asc">File name (A-Z)</string>
+    <string name="sort_name_desc">File name (Z-A)</string>
+    <string name="sort_by_size_desc">Size (largest first)</string>
+    <string name="sort_by_size_asc">Size (smallest first)</string>
+    <string name="sort_by_date_asc">Modified (newest first)</string>
+    <string name="sort_by_date_desc">Modified (oldest first)</string>
+    <string name="sort_by_type_asc">Type (A-Z)</string>
+    <string name="sort_by_type_desc">Type (Z-A)</string>
     <string name="toolbar_back_content">Back Button</string>
+    <string name="item_icon_description">Item icon</string>
 </resources>

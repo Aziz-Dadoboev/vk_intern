@@ -15,6 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
@@ -32,16 +36,55 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    static String getFileExtension(String fileName) {
+        int index = fileName.lastIndexOf(".");
+        if (index > 0) {
+            return fileName.substring(index + 1);
+        }
+        return "";
+    }
+
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 //        File selectedFile = files[position];
         File selectedFile = fileList.get(position);
         holder.text.setText(selectedFile.getName());
+
+        Date fileDate = new Date(selectedFile.lastModified());
+        DateFormat dateFormat = DateFormat.getDateInstance();
+        String formattedDate = dateFormat.format(fileDate);
+        holder.date.setText(formattedDate);
+
+        String fileSize = selectedFile.length() / 1024 + "KB";
+        holder.size.setText(fileSize);
+
         if (selectedFile.isDirectory()) {
             holder.icon.setImageResource(R.drawable.folder_icon_img);
         } else {
-            holder.icon.setImageResource(R.drawable.file_icon_img);
+            String type = getFileExtension(selectedFile.getName());
+            switch (type) {
+                case "jpg":
+                    holder.icon.setImageResource(R.drawable.jpg);
+                case "jpeg":
+                    holder.icon.setImageResource(R.drawable.jpg);
+                    break;
+                case "pdf":
+                    holder.icon.setImageResource(R.drawable.pdf);
+                    break;
+                case "png":
+                    holder.icon.setImageResource(R.drawable.png);
+                    break;
+                case "txt":
+                    holder.icon.setImageResource(R.drawable.txt);
+                    break;
+                case "xml":
+                    holder.icon.setImageResource(R.drawable.xml);
+                    break;
+                default:
+                    holder.icon.setImageResource(R.drawable.file_icon_img);
+            }
         }
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,11 +120,15 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
         TextView text;
         ImageView icon;
+        TextView size;
+        TextView date;
 
         public ViewHolder(View itemView) {
             super(itemView);
             text = itemView.findViewById(R.id.item_text_view);
             icon = itemView.findViewById(R.id.icon_image_view);
+            size = itemView.findViewById(R.id.item_size_view);
+            date = itemView.findViewById(R.id.item_date_view);
         }
     }
 
