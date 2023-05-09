@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +22,10 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,23 +41,21 @@ public class FilesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_files);
-
+        // Set Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.options_toolbar);
         toolbar.setOverflowIcon(drawable);
         setSupportActionBar(toolbar);
 
+        // Get Views
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         TextView noFiles = findViewById(R.id.no_files_textview);
         ImageView goBack = findViewById(R.id.back_toolbar_imageview);
 
-        goBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        // Go Back Button on Toolbar
+        goBack.setOnClickListener(v -> finish());
 
+        // Get Files
         String path = getIntent().getStringExtra("path");
         File root = new File(path);
         File[] files = root.listFiles();
@@ -58,12 +63,13 @@ public class FilesActivity extends AppCompatActivity {
             noFiles.setVisibility(View.VISIBLE);
             return;
         }
+        // Message Invisible
         noFiles.setVisibility(View.INVISIBLE);
 
+        // Show
         directoryListing = new ArrayList<>(Arrays.asList(files));
         directoryListing.sort(new SortFileName());
         directoryListing.sort(new SortFolder());
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerAdapter = new FileAdapter(getApplicationContext(), directoryListing);
         recyclerView.setAdapter(recyclerAdapter);
@@ -97,20 +103,6 @@ public class FilesActivity extends AppCompatActivity {
             directoryListing.sort(new SortFileTypeDesc());
         }
         recyclerAdapter.notifyDataSetChanged();
-//        switch (item.getItemId()) {
-//            case R.id.sort_by_name_asc:
-//                directoryListing.sort(new SortFileName());
-//                recyclerAdapter.notifyDataSetChanged();
-//                Toast.makeText(this, "Сортировка по названию (А-Я)", Toast.LENGTH_SHORT).show();
-//                return true;
-//            case sortByNameDesc:
-//                directoryListing.sort(new SortFileNameDesc());
-//                recyclerAdapter.notifyDataSetChanged();
-//                Toast.makeText(this, "Сортировка по названию (Я-А)", Toast.LENGTH_SHORT).show();
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -198,6 +190,20 @@ public class FilesActivity extends AppCompatActivity {
                 return -1;
             else
                 return 1;
+        }
+    }
+
+    private class SaveFilesTask extends AsyncTask<File, Void, Void> {
+        @Override
+        protected Void doInBackground(File... files) {
+            try (DatabaseHelper dbHelper = new DatabaseHelper(FilesActivity.this)) {
+                for (File file : files) {
+//                    dbHelper.addFile(file);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }
