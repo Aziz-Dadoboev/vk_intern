@@ -75,26 +75,23 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                     holder.icon.setImageResource(R.drawable.file_icon_img);
             }
         }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (selectedFile.isDirectory()) {
-                    Intent intent = new Intent(context, FilesActivity.class);
-                    String path = selectedFile.getPath();
-                    intent.putExtra("path", path);
+        holder.itemView.setOnClickListener(v -> {
+            if (selectedFile.isDirectory()) {
+                Intent intent = new Intent(context, FilesActivity.class);
+                String path = selectedFile.getPath();
+                intent.putExtra("path", path);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                try {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    String type = "image/*";
+                    intent.setDataAndType(Uri.parse(selectedFile.getPath()), type);
                     context.startActivity(intent);
-                } else {
-                    try {
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_VIEW);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        String type = "image/*";
-                        intent.setDataAndType(Uri.parse(selectedFile.getPath()), type);
-                        context.startActivity(intent);
-                    } catch (Exception e) {
-                        Toast.makeText(context.getApplicationContext(), "Cannot open file", Toast.LENGTH_SHORT).show();
-                    }
+                } catch (Exception e) {
+                    Toast.makeText(context.getApplicationContext(), "Cannot open file", Toast.LENGTH_SHORT).show();
                 }
             }
         });

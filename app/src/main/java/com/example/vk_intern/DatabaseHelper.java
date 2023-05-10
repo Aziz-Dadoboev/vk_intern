@@ -109,15 +109,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 directoryPath + "/%",
                 directoryPath + "/%/%"
         };
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_FILE_PATH + " LIKE ? OR " + COLUMN_FILE_PATH + " LIKE ?",
-//                selectionArgs);
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_FILE_PATH + " LIKE ? AND NOT " + COLUMN_FILE_PATH + " LIKE ?",
                 selectionArgs);
 
         if (cursor.moveToFirst()) {
             do {
                 int colIndex = cursor.getColumnIndex(COLUMN_FILE_PATH);
-                System.out.println("Index: " + colIndex);
                 String filePath = cursor.getString(colIndex);
                 colIndex = cursor.getColumnIndex(COLUMN_FILE_NAME);
                 String fileName = cursor.getString(colIndex);

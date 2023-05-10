@@ -89,7 +89,22 @@ public class FilesActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.sort_by_name_asc) { // Name A-Z
+        if (files.isEmpty()) {
+            return super.onOptionsItemSelected(item);
+        }
+        if (item.getItemId() == R.id.show_midfied) {
+            SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+            long lastOpenedTime = prefs.getLong("last_opened_time", 0);
+            List<MyListItem> fileList = new ArrayList<>();
+            for (MyListItem file : files) {
+                if (file.getDate() > lastOpenedTime) {
+                    fileList.add(file);
+                }
+            }
+            files = fileList;
+            Log.d("ITEM", "TRUE");
+        }
+        else if (item.getItemId() == R.id.sort_by_name_asc) { // Name A-Z
             files.sort(new Helper.SortFileName());
         } else if (item.getItemId() == R.id.sort_by_name_desc) { // Name Z-A
             files.sort(new Helper.SortFileNameDesc());
