@@ -65,6 +65,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean addFile (File file, String hashcode, String type) {
         SQLiteDatabase db = this.getWritableDatabase();
+        // Check if the file already exists in the database
+        Cursor cursor = db.query(TABLE_NAME, new String[] { COLUMN_FILE_PATH }, COLUMN_FILE_PATH + " = ?", new String[] { file.getAbsolutePath() }, null, null, null);
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        }
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_FILE_PATH, file.getAbsolutePath());
         cv.put(COLUMN_FILE_NAME, file.getName());
@@ -73,13 +79,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_IS_DIRECTORY, file.isDirectory());
         cv.put(COLUMN_FILE_TYPE, type);
         cv.put(COLUMN_HASH_CODE, hashcode);
-
-        // Check if the file already exists in the database
-        Cursor cursor = db.query(TABLE_NAME, new String[] { COLUMN_FILE_PATH }, COLUMN_FILE_PATH + " = ?", new String[] { file.getAbsolutePath() }, null, null, null);
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.close();
-            return true;
-        }
 
         long result = db.insert(TABLE_NAME, null, cv);
         if (result == -1) {
