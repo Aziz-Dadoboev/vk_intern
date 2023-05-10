@@ -1,18 +1,8 @@
 package com.example.vk_intern;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,24 +11,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class FilesActivity extends AppCompatActivity {
     List<MyListItem> files;
+    String path;
     private RecyclerView.Adapter<MyListAdapter.ViewHolder> recyclerAdapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +46,7 @@ public class FilesActivity extends AppCompatActivity {
         goBack.setOnClickListener(v -> finish());
 
         // Get Files
-        String path = getIntent().getStringExtra("path");
+        path = getIntent().getStringExtra("path");
 
         try (DatabaseHelper dbHelper = new DatabaseHelper(this)) {
             files = dbHelper.getFilesInDirectoryFromDb(path);
@@ -93,15 +81,17 @@ public class FilesActivity extends AppCompatActivity {
             return super.onOptionsItemSelected(item);
         }
         if (item.getItemId() == R.id.show_midfied) {
-            SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
-            long lastOpenedTime = prefs.getLong("last_opened_time", 0);
-            List<MyListItem> fileList = new ArrayList<>();
-            for (MyListItem file : files) {
-                if (file.getDate() > lastOpenedTime) {
-                    fileList.add(file);
+            File rootDirectory = new File(path);
+            List<File> allFiles = new ArrayList<>();
+            Helper.getAllFilesInDirectory(rootDirectory, allFiles);
+            int min = Math.min(allFiles.size(), files.size());
+            List<MyListItem> newList = new ArrayList<>(min);
+            for (int i = 0; i < min; i++) {
+                if (files.get(i).hashCode() != allFiles.get(i).hashCode()) {
+                    newList.add(files.get(i));
                 }
             }
-            files = fileList;
+            files = newList;
             Log.d("ITEM", "TRUE");
         }
         else if (item.getItemId() == R.id.sort_by_name_asc) { // Name A-Z

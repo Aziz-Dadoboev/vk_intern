@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +97,22 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                 }
             }
         });
+        holder.itemView.setOnLongClickListener(v -> {
+            Log.d("CLICK", "Long Clicked");
+            if (!selectedFile.isDirectory()) {
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.popup_menu, popup.getMenu());
+                popup.show();
+                popup.setOnMenuItemClickListener(item -> {
+                    if (item.getItemId() == R.id.menu_option_1) {
+                        Helper.shareFile(selectedFile.getPath(), context);
+                    }
+                    return false;
+                });
+            }
+            return false;
+        });
     }
 
     @Override
@@ -102,7 +120,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         return files.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView text;
         ImageView icon;
         TextView size;

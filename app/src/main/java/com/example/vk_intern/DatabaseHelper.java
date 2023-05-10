@@ -5,21 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private Context context;
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "my_files_database.db";
     public static final String TABLE_NAME = "files_data_table";
@@ -36,7 +28,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.context = context;
     }
 
     @Override
@@ -83,25 +74,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long result = db.insert(TABLE_NAME, null, cv);
         return result != -1;
     }
-
-    public List<File> getChangedFiles(long lastOpened) {
-        SQLiteDatabase db = getReadableDatabase();
-        List<File> changedFiles = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE last_modified > ?", new String[] { String.valueOf(lastOpened) });
-        if (cursor.moveToFirst()) {
-            do {
-                int colIndex = cursor.getColumnIndex(COLUMN_FILE_PATH);
-                File file = new File(cursor.getString(colIndex));
-                if (file.exists()) {
-                    changedFiles.add(file);
-                }
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        db.close();
-        return changedFiles;
-    }
-
     public List<MyListItem> getFilesInDirectoryFromDb(String directoryPath) {
         SQLiteDatabase db = getReadableDatabase();
         List<MyListItem> files = new ArrayList<>();

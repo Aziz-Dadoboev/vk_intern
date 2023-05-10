@@ -1,28 +1,14 @@
 package com.example.vk_intern;
 
-import android.content.Intent;
+import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import android.Manifest;
-import android.provider.ContactsContract;
-import android.util.Log;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements DataBaseTask.FinishListener{
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 1;
@@ -33,7 +19,7 @@ public class MainActivity extends AppCompatActivity implements DataBaseTask.Fini
 
         int currApi = android.os.Build.VERSION.SDK_INT;
         if (currApi != 33) {
-            while (!checkPermission()) { // TODO Api 33 Bug: https://github.com/xamarin/Essentials/issues/2041
+            while (!checkPermission()) {
                 askPermission();
             }
         }
@@ -52,8 +38,6 @@ public class MainActivity extends AppCompatActivity implements DataBaseTask.Fini
 
     private boolean checkPermission() {
         int read = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-//        int write = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
         return read == PackageManager.PERMISSION_GRANTED;
     }
     private void askPermission () {

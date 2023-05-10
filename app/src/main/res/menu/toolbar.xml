@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/show_midfied"
-        android:title="Modified"
+        android:title="@string/modified"
         android:icon="@drawable/modified_icon"
         app:showAsAction="ifRoom"/>
 

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +34,7 @@ public class DataBaseTask extends AsyncTask<Void, Void, Void> {
         String path = Environment.getExternalStorageDirectory().getPath();
         File rootDirectory = new File(path);
         List<File> allFiles = new ArrayList<>();
-        getAllFilesInDirectory(rootDirectory, allFiles);
+        Helper.getAllFilesInDirectory(rootDirectory, allFiles);
 
         // Save to Data Base
         try (DatabaseHelper dbHelper = new DatabaseHelper(context)) {
@@ -44,7 +43,7 @@ public class DataBaseTask extends AsyncTask<Void, Void, Void> {
                 String type = "Folder";
                 if (file.isFile()) {
                     hashcode = calculateHashCode(file);
-                    type = FileAdapter.getFileExtension(file.getName());
+                    type = Helper.getFileExtension(file.getName());
                 }
                 if (dbHelper.addFile(file, hashcode, type)) {
                     Log.d("DATABASE", "INSERTED");
@@ -67,20 +66,6 @@ public class DataBaseTask extends AsyncTask<Void, Void, Void> {
         intent.putExtra("path", path);
         context.startActivity(intent);
         finishListener.processFinish();
-    }
-
-
-    private void getAllFilesInDirectory(File directory, List<File> listFiles) {
-        File[] files = directory.listFiles();
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            listFiles.add(file);
-            if (file.isDirectory()) {
-                getAllFilesInDirectory(file, listFiles);
-            }
-        }
     }
 
     private String calculateHashCode(File file) {
