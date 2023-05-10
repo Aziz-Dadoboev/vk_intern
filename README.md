@@ -32,4 +32,4 @@
 
 # Cкрины
 
-![image](https://github.com/Aziz-Dadoboev/vk_intern/screen.png)
+![Alt text](https://github.com/Aziz-Dadoboev/vk_intern/blob/master/screen.PNG "скрин")
