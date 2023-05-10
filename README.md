@@ -32,4 +32,4 @@
 
 # Cкрины
 
-![image](https://github.com/Aziz-Dadoboev/vk_intern/assets/68865736/1a66ebc3-12e3-4fd8-bc72-6a4c68b15c0c)
+![image](https://github.com/Aziz-Dadoboev/vk_intern/screen.png)
