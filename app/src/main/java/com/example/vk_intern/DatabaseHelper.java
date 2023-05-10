@@ -81,12 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_HASH_CODE, hashcode);
 
         long result = db.insert(TABLE_NAME, null, cv);
-        if (result == -1) {
-            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
-        return true;
+        return result != -1;
     }
 
     public List<File> getChangedFiles(long lastOpened) {

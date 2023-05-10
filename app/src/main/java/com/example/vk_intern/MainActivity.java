@@ -24,50 +24,21 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DataBaseTask.FinishListener{
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (checkPermission()) {
-            Intent intent = new Intent(MainActivity.this, FilesActivity.class);
-            String path = Environment.getExternalStorageDirectory().getPath();
-
-            // get list of files
-            File rootDirectory = new File(path);
-            List<File> allFiles = new ArrayList<>();
-            getAllFilesInDirectory(rootDirectory, allFiles);
-
-            // Save to Data Base
-            try (DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext())) {
-                for (File file : allFiles) {
-                    String hashcode = "Folder";
-                    String type = "Folder";
-                    if (file.isFile()) {
-                        hashcode = calculateHashCode(file);
-                        type = FileAdapter.getFileExtension(file.getName());
-                    }
-                    if (dbHelper.addFile(file, hashcode, type)) {
-                        Toast.makeText(this, "Inserted successfully", Toast.LENGTH_SHORT).show();
-                        Log.d("DATABASE", "INSERTED");
-                    } else {
-                        Log.d("DATABASE", "FAILED INSERTING");
-                        Toast.makeText(this, "Inserted Failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d("DATABASE_ERROR", "Failed to save");
+        int currApi = android.os.Build.VERSION.SDK_INT;
+        if (currApi != 33) {
+            while (!checkPermission()) { // TODO Api 33 Bug: https://github.com/xamarin/Essentials/issues/2041
+                askPermission();
             }
-
-            intent.putExtra("path", path);
-            startActivity(intent);
-            finish();
-        } else {
-            askPermission();
         }
+        DataBaseTask task = new DataBaseTask(this, this);
+        task.execute();
     }
 
     @Override
@@ -81,60 +52,22 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkPermission() {
         int read = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        int write = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        int write = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERMISSION_GRANTED;
+        return read == PackageManager.PERMISSION_GRANTED;
     }
     private void askPermission () {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
-                MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
-        ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Toast.makeText(MainActivity.this, "Storage permission is required!", Toast.LENGTH_SHORT).show();
         } else {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_READ_EXTERNAL_STORAGE);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]
+                    {Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
         }
     }
 
-    private void getAllFilesInDirectory(File directory, List<File> listFiles) {
-        File[] files = directory.listFiles();
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            listFiles.add(file);
-            if (file.isDirectory()) {
-                getAllFilesInDirectory(file, listFiles);
-            }
-        }
+    @Override
+    public void processFinish() {
+        finish();
     }
-
-    private String calculateHashCode(File file) {
-        if (file.isDirectory()) {
-            return "";
-        }
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            FileInputStream fis = new FileInputStream(file);
-            byte[] dataBytes = new byte[1024];
-            int nread = 0;
-            while ((nread = fis.read(dataBytes)) != -1) {
-                md.update(dataBytes, 0, nread);
-            };
-            byte[] mdBytes = md.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte mdByte : mdBytes) {
-                sb.append(Integer.toString((mdByte & 0xff) + 0x100, 16).substring(1));
-            }
-            fis.close();
-            return sb.toString();
-        } catch (NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
 }
