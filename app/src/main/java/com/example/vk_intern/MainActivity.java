@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements DataBaseTask.Fini
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_splash_screen);
 
         int currApi = android.os.Build.VERSION.SDK_INT;
         if (currApi != 33) {
