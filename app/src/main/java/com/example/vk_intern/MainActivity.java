@@ -1,65 +1,57 @@
 package com.example.vk_intern;
 
+import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import android.Manifest;
-import java.io.File;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DataBaseTask.FinishListener{
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_splash_screen);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    REQUEST_READ_EXTERNAL_STORAGE);
+        int currApi = android.os.Build.VERSION.SDK_INT;
+        if (currApi != 33) {
+            while (!checkPermission()) {
+                askPermission();
+            }
         }
-
-        Log.d("PROCESS" , "Started");
-        String path = Environment.getExternalStorageDirectory().toString();
-        Log.d("FILES", "Path: " + path);
-        File directory = new File(path);
-//        getAllFiles(directory);
-        getFilesRecursive(directory);
-        Log.d("PROCESS", "Finished");
-
+        DataBaseTask task = new DataBaseTask(this, this);
+        task.execute();
     }
 
-    private void getAllFiles(File directory) {
-        File[] files = directory.listFiles();
-        assert files != null;
-        Log.d("FILES", "Size: "+ files.length);
-        for (File value : files) {
-            Log.d("FILES", "FileName:" + value.getName());
-            Log.d("FILES", "Is Directory : " + value.isDirectory());
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong("lastOpened", System.currentTimeMillis());
+        editor.apply();
+    }
+
+    private boolean checkPermission() {
+        int read = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        return read == PackageManager.PERMISSION_GRANTED;
+    }
+    private void askPermission () {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            Toast.makeText(MainActivity.this, "Storage permission is required!", Toast.LENGTH_SHORT).show();
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]
+                    {Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
         }
     }
 
-    private void getFilesRecursive(File directory) {
-        if (directory == null) {
-            return;
-        }
-        if (directory.isFile()) {
-            Log.d("FILES", "Filename: " + directory.getName());
-            return;
-        }
-        File[] files = directory.listFiles();
-        if (files == null) {
-            return;
-        }
-        for (File value : files) {
-            getFilesRecursive(value);
-        }
+    @Override
+    public void processFinish() {
+        finish();
     }
 }

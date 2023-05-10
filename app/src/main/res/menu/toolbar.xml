@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/show_midfied"
+        android:title="@string/modified"
+        android:icon="@drawable/modified_icon"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/sort_by_date_asc"
+        android:title="@string/sort_by_date_asc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_date_desc"
+        android:title="@string/sort_by_date_desc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_size_desc"
+        android:title="@string/sort_by_size_desc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_size_asc"
+        android:title="@string/sort_by_size_asc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_type_asc"
+        android:title="@string/sort_by_type_asc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_type_desc"
+        android:title="@string/sort_by_type_desc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_name_asc"
+        android:title="@string/sort_name_asc"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/sort_by_name_desc"
+        android:title="@string/sort_name_desc"
+        app:showAsAction="never"/>
+
+</menu>
