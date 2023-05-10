@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,6 +38,7 @@ import java.util.List;
 public class FilesActivity extends AppCompatActivity {
 
     private List<File> directoryListing;
+    private RecyclerView.Adapter<MyListAdapter.ViewHolder> recyclerAdapter2;
     private RecyclerView.Adapter<FileAdapter.ViewHolder> recyclerAdapter;
 
     @Override
@@ -57,22 +61,55 @@ public class FilesActivity extends AppCompatActivity {
 
         // Get Files
         String path = getIntent().getStringExtra("path");
-        File root = new File(path);
-        File[] files = root.listFiles();
-        if (files == null || files.length == 0) {
-            noFiles.setVisibility(View.VISIBLE);
-            return;
-        }
+//        System.out.println("Path: " + path);
+//        File root = new File(path);
+//        if (!root.canRead() || !root.canWrite() || !root.canExecute()) {
+//            boolean read = root.setReadable(true);
+//            boolean write = root.setWritable(true);
+//            boolean exec = root.setExecutable(true);
+//            if (!read || !write || !exec) {
+//                Log.d("ACCESS", "Failed to change permission");
+//            }
+//        }
+//        File[] files = root.listFiles();
+//        if (files == null || files.length <= 0) {
+//            noFiles.setVisibility(View.VISIBLE);
+//            return;
+//        }
+
+
         // Message Invisible
-        noFiles.setVisibility(View.INVISIBLE);
+//        noFiles.setVisibility(View.INVISIBLE);
+
+        // get list of modified files
+//        DatabaseHelper dbHelper = new DatabaseHelper(this);
+//        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+//        long lastOpened = prefs.getLong("lastOpened", 0);
+//        List<File> changedFiles = dbHelper.getChangedFiles(lastOpened);
 
         // Show
-        directoryListing = new ArrayList<>(Arrays.asList(files));
-        directoryListing.sort(new SortFileName());
-        directoryListing.sort(new SortFolder());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerAdapter = new FileAdapter(getApplicationContext(), directoryListing);
-        recyclerView.setAdapter(recyclerAdapter);
+//        directoryListing = new ArrayList<>(Arrays.asList(files));
+//        directoryListing.sort(new SortFileName());
+//        directoryListing.sort(new SortFolder());
+//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//        recyclerAdapter = new FileAdapter(getApplicationContext(), directoryListing);
+
+//        recyclerView.setAdapter(recyclerAdapter);
+        try (DatabaseHelper dbHelper = new DatabaseHelper(this)) {
+            List<MyListItem> files = dbHelper.getFilesInDirectoryFromDb(path);
+            if (files.isEmpty()) {
+                noFiles.setVisibility(View.VISIBLE);
+                return;
+            }
+            noFiles.setVisibility(View.INVISIBLE);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerAdapter2 = new MyListAdapter(getApplicationContext(), files);
+            recyclerView.setAdapter(recyclerAdapter2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("ERROR", "DATABASE Reading Failed");
+        }
+
     }
 
     @Override

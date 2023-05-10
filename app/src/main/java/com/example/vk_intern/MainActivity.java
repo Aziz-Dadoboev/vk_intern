@@ -1,27 +1,19 @@
 package com.example.vk_intern;
 
-import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.provider.ContactsContract;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -42,24 +34,34 @@ public class MainActivity extends AppCompatActivity {
         if (checkPermission()) {
             Intent intent = new Intent(MainActivity.this, FilesActivity.class);
             String path = Environment.getExternalStorageDirectory().getPath();
+
+            // get list of files
             File rootDirectory = new File(path);
-            List<File> allFiles = getAllFilesInDirectory(rootDirectory);
+            List<File> allFiles = new ArrayList<>();
+            getAllFilesInDirectory(rootDirectory, allFiles);
+
             // Save to Data Base
-            DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
-            for (File file : allFiles) {
-                String hashcode = calculateHashCode(file);
-                String type = FileAdapter.getFileExtension(file.getName());
-                if (hashcode.equals("") || type.equals("")) {
-                    continue;
+            try (DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext())) {
+                for (File file : allFiles) {
+                    String hashcode = "Folder";
+                    String type = "Folder";
+                    if (file.isFile()) {
+                        hashcode = calculateHashCode(file);
+                        type = FileAdapter.getFileExtension(file.getName());
+                    }
+                    if (dbHelper.addFile(file, hashcode, type)) {
+                        Toast.makeText(this, "Inserted successfully", Toast.LENGTH_SHORT).show();
+                        Log.d("DATABASE", "INSERTED");
+                    } else {
+                        Log.d("DATABASE", "FAILED INSERTING");
+                        Toast.makeText(this, "Inserted Failed", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                if (dbHelper.addFile(file, hashcode, type)) {
-                    Toast.makeText(this, "Inserted successfully", Toast.LENGTH_SHORT).show();
-                    Log.d("DATABASE", "INSERTED");
-                } else {
-                    Log.d("DATABASE", "FAILED INSERTING");
-                    Toast.makeText(this, "Inserted Failed", Toast.LENGTH_SHORT).show();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("DATABASE_ERROR", "Failed to save");
             }
+
             intent.putExtra("path", path);
             startActivity(intent);
             finish();
@@ -68,35 +70,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong("lastOpened", System.currentTimeMillis());
+        editor.apply();
+    }
+
     private boolean checkPermission() {
-        int ans = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        return ans == PackageManager.PERMISSION_GRANTED;
+        int read = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        int write = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERMISSION_GRANTED;
     }
     private void askPermission () {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
+        ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             Toast.makeText(MainActivity.this, "Storage permission is required!", Toast.LENGTH_SHORT).show();
         } else {
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_READ_EXTERNAL_STORAGE);
         }
     }
 
-    private List<File> getAllFilesInDirectory(File directory) {
-        List<File> fileList = new ArrayList<>();
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile()) {
-                        fileList.add(file);
-                    } else if (file.isDirectory()) {
-                        fileList.addAll(getAllFilesInDirectory(file));
-                    }
-                }
+    private void getAllFilesInDirectory(File directory, List<File> listFiles) {
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            listFiles.add(file);
+            if (file.isDirectory()) {
+                getAllFilesInDirectory(file, listFiles);
             }
         }
-        return fileList;
     }
 
     private String calculateHashCode(File file) {

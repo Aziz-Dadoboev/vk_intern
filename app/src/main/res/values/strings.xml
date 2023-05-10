@@ -11,4 +11,5 @@
     <string name="sort_by_type_desc">Type (Z-A)</string>
     <string name="toolbar_back_content">Back Button</string>
     <string name="item_icon_description">Item icon</string>
+    <string name="no_files">No files</string>
 </resources>

@@ -13,7 +13,7 @@
         android:id="@+id/no_files_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="No files"
+        android:text="@string/no_files"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,10 +24,11 @@
         android:layout_marginTop="@dimen/item_border_line_marginTop"
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_toEndOf="@id/toolbar"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
